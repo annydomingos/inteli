@@ -1,4 +1,5 @@
 import requests
+import streamlit as st
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.models.openrouter import OpenRouterModel
@@ -73,64 +74,47 @@ agente_arquiteto = Agent(
 )
 
 
-# ── Função utilitária para exibir o resultado formatado ───────────────────────
-def exibir_analise(resultado: ArquiteturaDeAgentes, business_case: str) -> None:
-    separador = "=" * 70
+# ── Frontend Streamlit ─────────────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Agente Arquiteto",
+    page_icon="🏗️",
+    layout="wide"
+)
 
-    print(separador)
-    print("BUSINESS CASE ANALISADO:")
-    print(separador)
-    print(business_case)
+st.title("🏗️ Agente Arquiteto de Sistemas Multi-Agentes")
+st.markdown("Descreva seu **business case** e receba uma análise completa das 4 arquiteturas de orquestração de agentes, com recomendação final.")
 
-    print(f"\n{separador}")
-    print("ARQUITETURA 1 — PROMPT CHAINING")
-    print(separador)
-    print(resultado.arquitetura_1_prompt_chaining)
+business_case = st.text_area(
+    label="Business Case",
+    placeholder="Ex: Uma empresa de e-commerce quer automatizar o atendimento ao cliente...",
+    height=180
+)
 
-    print(f"\n{separador}")
-    print("ARQUITETURA 2 — ORCHESTRATOR-WORKERS")
-    print(separador)
-    print(resultado.arquitetura_2_orchestrator_workers)
+if st.button("Analisar", type="primary", disabled=not business_case.strip()):
+    with st.spinner("Analisando business case... aguarde."):
+        resposta = agente_arquiteto.run_sync(business_case)
+        resultado = resposta.output
 
-    print(f"\n{separador}")
-    print("ARQUITETURA 3 — PARALLELIZATION")
-    print(separador)
-    print(resultado.arquitetura_3_parallelization)
+    st.divider()
 
-    print(f"\n{separador}")
-    print("ARQUITETURA 4 — ROUTING")
-    print(separador)
-    print(resultado.arquitetura_4_routing)
+    col1, col2 = st.columns(2)
 
-    print(f"\n{separador}")
-    print("⭐  RECOMENDAÇÃO DO ARQUITETO")
-    print(separador)
-    print(resultado.recomendacao_final)
-    print(separador)
+    with col1:
+        with st.expander("🔗 Arquitetura 1 — Prompt Chaining", expanded=True):
+            st.write(resultado.arquitetura_1_prompt_chaining)
 
+        with st.expander("🎛️ Arquitetura 3 — Parallelization", expanded=True):
+            st.write(resultado.arquitetura_3_parallelization)
 
-# ── Input do usuário via terminal ──────────────────────────────────────────────
-print("=" * 70)
-print("🏗️  AGENTE ARQUITETO DE SISTEMAS MULTI-AGENTES")
-print("=" * 70)
-print("Descreva seu business case abaixo.")
-print("(pode ser multilinha — quando terminar, deixe uma linha em branco e pressione Enter)\n")
+    with col2:
+        with st.expander("🧠 Arquitetura 2 — Orchestrator-Workers", expanded=True):
+            st.write(resultado.arquitetura_2_orchestrator_workers)
 
-linhas = []
-while True:
-    linha = input()
-    if linha == "":
-        break
-    linhas.append(linha)
+        with st.expander("🔀 Arquitetura 4 — Routing", expanded=True):
+            st.write(resultado.arquitetura_4_routing)
 
-business_case = " ".join(linhas)
+    st.divider()
+    st.subheader("⭐ Recomendação do Arquiteto")
+    st.success(resultado.recomendacao_final)
 
-if not business_case.strip():
-    print("Nenhum business case informado. Encerrando.")
-    exit()
-
-# ── Execução ───────────────────────────────────────────────────────────────────
-print("\nAnalisando business case... aguarde.\n")
-resposta = agente_arquiteto.run_sync(business_case)
-exibir_analise(resposta.output, business_case)
-print(f"\nChamadas à API: {resposta.usage().requests}")
+    st.caption(f"Chamadas à API: {resposta.usage().requests}")
