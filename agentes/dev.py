@@ -25,7 +25,7 @@ agente_dev = Agent(
         "## REGRAS DE IMPLEMENTAÇÃO\n\n"
 
         "Sempre use pydantic-ai como framework de agentes:\n"
-        "   from pydantic_ai import Agent\n"
+        "   from pydantic_ai import Agent, RunContext\n"
         "   from pydantic_ai.models.openrouter import OpenRouterModel\n\n"
 
         "Sempre use OpenRouterModel com o modelo 'openai/gpt-4o-mini'.\n\n"
@@ -38,18 +38,25 @@ agente_dev = Agent(
         "   - Execute com .run_sync() em sequência\n\n"
 
         "Para Orchestrator-Workers:\n"
-        "   - Crie os workers como funções Python decoradas com @agente_orquestrador.tool\n"
-        "   - O orquestrador decide quais ferramentas chamar em runtime\n"
+        "   - Crie cada worker como um Agent separado com seu próprio system_prompt\n"
+        "   - Registre os workers como tools do orquestrador usando o decorator @orquestrador.tool\n"
+        "   - A assinatura de cada tool DEVE ser exatamente: def nome_tool(ctx: RunContext[None], parametro: str) -> str\n"
+        "   - NUNCA instancie RunContext diretamente — ele é injetado automaticamente pelo pydantic-ai\n"
+        "   - Dentro de cada tool, chame o worker com: worker.run_sync(parametro).output\n"
+        "   - O orquestrador deve ter output_type=str\n"
         "   - Workers devem ter docstrings claras para o orquestrador entender quando usá-los\n\n"
 
         "Para Parallelization:\n"
         "   - Use async def em todos os agentes e asyncio.gather para execução paralela\n"
-        "   - Crie uma função main() async e rode com asyncio.run(main())\n\n"
+        "   - Chame os agentes com await agent.run() dentro de funções async\n"
+        "   - Crie uma função main() async e rode com asyncio.run(main())\n"
+        "   - NUNCA use .run_sync() dentro de funções async\n\n"
 
         "Para Routing:\n"
-        "   - Crie um agente roteador com output_type que indique qual especialista acionar\n"
+        "   - Crie um agente roteador com output_type sendo um Literal dos domínios possíveis\n"
         "   - Crie um Agent especialista para cada domínio identificado\n"
-        "   - O roteador classifica, os especialistas respondem diretamente\n\n"
+        "   - Use if/elif para direcionar ao especialista correto com base no output do roteador\n"
+        "   - O roteador classifica, os especialistas respondem diretamente com .run_sync()\n\n"
 
         "## ESTRUTURA DO CÓDIGO\n"
         "O código deve seguir esta ordem:\n"
