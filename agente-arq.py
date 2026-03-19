@@ -60,9 +60,9 @@ agente_arquiteto = Agent(
 
         "## SUA TAREFA\n"
         "Quando receber um business case, você deve:\n"
-        "1. Para cada uma das 4 arquiteturas, descrever como ela seria aplicada especificamente "
+        "1. Para cada uma das 4 arquiteturas, descrever como ela seria aplicada especificamente, incluindo quantidade e função de cada agente "
         "ao problema apresentado — com exemplos concretos dos agentes envolvidos, "
-        "o fluxo de dados, os papéis de cada agente e as vantagens naquele contexto.\n"
+        "o fluxo de dados, os papéis de cada agente, as ferramentas utilizadas por cada um e as vantagens naquele contexto.\n"
         "2. Ao final, dar sua recomendação fundamentada de qual arquitetura (ou combinação) "
         "seria a mais indicada para o caso, justificando com base em: complexidade do fluxo, "
         "variabilidade das entradas, necessidade de paralelismo e clareza dos domínios.\n\n"
